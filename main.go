@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/VividCortex/godaemon"
 	"github.com/shadowsocks/go-shadowsocks2/core"
 	"github.com/shadowsocks/go-shadowsocks2/socks"
 )
@@ -46,6 +47,7 @@ func main() {
 		TCPTun    string
 		UDPTun    string
 		UDPSocks  bool
+		Daemon    bool
 	}
 
 	flag.BoolVar(&config.Verbose, "verbose", false, "verbose mode")
@@ -62,6 +64,7 @@ func main() {
 	flag.StringVar(&flags.TCPTun, "tcptun", "", "(client-only) TCP tunnel (laddr1=raddr1,laddr2=raddr2,...)")
 	flag.StringVar(&flags.UDPTun, "udptun", "", "(client-only) UDP tunnel (laddr1=raddr1,laddr2=raddr2,...)")
 	flag.DurationVar(&config.UDPTimeout, "udptimeout", 5*time.Minute, "UDP tunnel timeout")
+	flag.BoolVar(&flags.Daemon, "daemon", false, "run as daemon")
 	flag.Parse()
 
 	if flags.Keygen > 0 {
@@ -83,6 +86,10 @@ func main() {
 			log.Fatal(err)
 		}
 		key = k
+	}
+
+	if flags.Daemon {
+		godaemon.MakeDaemon(&godaemon.DaemonAttr{})
 	}
 
 	if flags.Client != "" { // client mode
